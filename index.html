@@ -1,0 +1,52 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="dark">
+  <meta name="theme-color" content="#0b1020">
+  <title>Hide-and-Seek · Campus Lost & Found</title>
+  <meta name="description" content="Report lost and found items on campus, get smart match suggestions, and recover them safely.">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🙈</text></svg>">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <header>
+    <div class="container nav-row">
+      <a href="#/" class="logo"><i class="logo-emoji">🙈</i> <b class="logo-text">Hide<span>-and-</span>Seek</b></a>
+      <nav id="mainNav" class="hidden">
+        <a data-nav href="#/">Home</a>
+        <a data-nav href="#/report">Report</a>
+        <a data-nav href="#/browse">Browse</a>
+        <a data-nav href="#/matches">Matches</a>
+        <a data-nav href="#/mine">My reports</a>
+        <a data-nav href="#/how">How it works</a>
+      </nav>
+      <div id="userArea" class="user-area"></div>
+    </div>
+  </header>
+
+  <main id="app" class="container"></main>
+
+
+  <div id="modal" class="modal"><div class="modal-card"><button class="modal-close" aria-label="Close">×</button><div id="modal-body"></div></div></div>
+  <div id="toast" class="toast"></div>
+
+  <!-- AI image model (TensorFlow.js + MobileNet). If these fail to load, the app still works. -->
+  <script defer src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@4.22.0/dist/tf.min.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/@tensorflow-models/mobilenet@2.1.1/dist/mobilenet.min.js"></script>
+
+  <!-- Shared online database (Firebase). Only used if you add your config in js/cloud.js -->
+  <script defer src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+  <script defer src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+
+  <!-- Our code -->
+  <script defer src="js/data.js"></script>
+  <script defer src="js/cloud.js"></script>
+  <script defer src="js/image.js"></script>
+  <script defer src="js/matcher.js"></script>
+  <script defer src="js/app.js"></script>
+</body>
+</html>
