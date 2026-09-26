@@ -1,5 +1,5 @@
 /* =========================================================
-   data.js — campus settings, saved data, users, demo data
+   data.js — campus settings, saved data, users
    ---------------------------------------------------------
    Everything the app "remembers" lives here. We store it in
    the browser's localStorage (a small built-in database that
@@ -87,14 +87,14 @@ const COLORS = [
 const CAMPUS_EMAIL = /@([a-z0-9-]+\.)*(edu|ac\.in|edu\.in)$/i;
 
 // --- Storage -------------------------------------------------------------
-const STORE_KEY = 'hide-and-seek-v2';
+const STORE_KEY = 'hide-and-seek-live';
 
 const Store = {
   load() {
     try {
       const raw = localStorage.getItem(STORE_KEY);
       if (raw) return JSON.parse(raw);
-    } catch (e) { /* storage blocked or corrupted: fall back to demo data */ }
+    } catch (e) { /* storage blocked or corrupted: start empty */ }
     return null;
   },
   save(state) {
@@ -112,7 +112,7 @@ const Store = {
 // Who is logged in on this device.
 //  - localStorage keeps you logged in after closing the browser.
 //  - sessionStorage is per browser TAB, so two tabs can be two different
-//    students at the same time (great for demoing the chat).
+//    students at the same time (handy for testing the chat).
 const Session = (() => {
   let mem = null;
   const tryGet = (st) => { try { return st.getItem('hs-user'); } catch (e) { return null; } };
@@ -146,93 +146,8 @@ function newId(prefix) {
   return prefix + '_' + Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
 }
 
-// --- Demo data -----------------------------------------------------------
-// Dates are relative to "now", so the demo always looks fresh.
-function hoursAgo(h) {
-  return new Date(Date.now() - h * 3600 * 1000).toISOString();
-}
-
-const DEMO_PASSWORD = 'demo123';
-
-function demoState() {
-  const pw = hashPassword(DEMO_PASSWORD);
-  const users = [
-    ['Priya', 'priya@campus.edu'], ['Arjun', 'arjun@campus.edu'], ['Rahul', 'rahul@campus.edu'],
-    ['Sneha', 'sneha@campus.edu'], ['Ankit', 'ankit@campus.edu'], ['Meera', 'meera@campus.edu'],
-    ['Karthik', 'karthik@campus.edu'], ['Divya', 'divya@campus.edu'], ['Rohan', 'rohan@campus.edu'],
-    ['Campus Security', 'security@campus.edu'],
-  ].map(([name, email]) => ({ name, username: email.split('@')[0], email, pw }));
-
-  const base = { status: 'active', image: null, hist: null, aiTags: [], tags: [], brand: '', verifyQuestion: '', verifyAnswer: '' };
-  const lost = (o) => ({ ...base, type: 'lost', createdAt: o.date, ...o });
-  const found = (o) => ({ ...base, type: 'found', createdAt: o.date, ...o });
-
-  const items = [
-    lost({ id: 'L1', owner: 'priya@campus.edu', title: 'HP laptop charger', category: 'Electronics', color: 'Black', brand: 'HP',
-      tags: ['charger', '65w'], description: '65W HP charger with round pin. Left it near the charging points on the 2nd floor.',
-      location: 'Library', date: hoursAgo(50) }),
-    lost({ id: 'L2', owner: 'arjun@campus.edu', title: 'Blue steel water bottle', category: 'Bottles', color: 'Blue', brand: 'Milton',
-      tags: ['bottle', 'sticker'], description: '1 litre steel bottle with a cat sticker and a small dent near the cap.',
-      location: 'Sports Ground', date: hoursAgo(26) }),
-    lost({ id: 'L3', owner: 'rahul@campus.edu', title: 'College ID card', category: 'ID & Cards', color: 'Red',
-      tags: ['id card', 'lanyard'], description: 'ID card on a red lanyard. 3rd year CSE student.',
-      location: 'CSE Department', date: hoursAgo(75), status: 'active' }),
-    lost({ id: 'L4', owner: 'sneha@campus.edu', title: 'boAt wireless earbuds', category: 'Electronics', color: 'Black', brand: 'boAt',
-      tags: ['earbuds', 'airdopes'], description: 'Airdopes earbuds in a black charging case. Small scratch on the lid.',
-      location: 'Canteen', date: hoursAgo(22) }),
-    lost({ id: 'L5', owner: 'ankit@campus.edu', title: 'Brown leather wallet', category: 'Wallet & Money', color: 'Brown', brand: 'Woodland',
-      tags: ['wallet', 'cash'], description: 'Brown wallet with some cash and my college ID inside.',
-      location: 'Bus Stop', date: hoursAgo(98), status: 'matched' }),
-    lost({ id: 'L6', owner: 'meera@campus.edu', title: 'Casio scientific calculator', category: 'Stationery & Books', color: 'Grey', brand: 'Casio',
-      tags: ['calculator', 'exam'], description: 'fx-991ES calculator, forgot it after the exam in room 204.',
-      location: 'Admin Block', date: hoursAgo(20) }),
-
-    found({ id: 'F1', owner: 'rohan@campus.edu', title: 'Laptop adapter found', category: 'Electronics', color: 'Black', brand: 'HP',
-      tags: ['charger', 'adapter'], description: 'Black HP adapter lying on a table near the charging sockets, second floor.',
-      location: 'Library', date: hoursAgo(30),
-      verifyQuestion: 'What wattage is written on the adapter?', verifyAnswer: '65W' }),
-    found({ id: 'F2', owner: 'karthik@campus.edu', title: 'Steel bottle with sticker', category: 'Bottles', color: 'Blue',
-      tags: ['bottle', 'flask'], description: 'Blue metal flask with a cat sticker, found on the bench near the football field.',
-      location: 'Sports Ground', date: hoursAgo(12),
-      verifyQuestion: 'Describe any mark or damage on the bottle.', verifyAnswer: 'dent near the cap' }),
-    found({ id: 'F3', owner: 'divya@campus.edu', title: 'ID card with lanyard', category: 'ID & Cards', color: 'Red',
-      tags: ['id card'], description: 'College identity card on a red lanyard, found in the corridor.',
-      location: 'Library', date: hoursAgo(60),
-      verifyQuestion: 'What name is printed on the card?', verifyAnswer: 'Rahul' }),
-    found({ id: 'F4', owner: 'karthik@campus.edu', title: 'Earphones charging case', category: 'Electronics', color: 'Black', brand: 'boAt',
-      tags: ['earphones'], description: 'Black earphone case with white buds inside. Left on a canteen table.',
-      location: 'Canteen', date: hoursAgo(18),
-      verifyQuestion: 'Is there any mark on the case?', verifyAnswer: 'scratch on the lid' }),
-    found({ id: 'F5', owner: 'rohan@campus.edu', title: 'Black umbrella', category: 'Other', color: 'Black',
-      tags: ['umbrella'], description: 'Foldable black umbrella left on a seat.',
-      location: 'Auditorium', date: hoursAgo(24) }),
-    found({ id: 'F6', owner: 'security@campus.edu', title: 'Calculator in exam hall', category: 'Stationery & Books', color: 'Grey', brand: 'Casio',
-      tags: ['calculator'], description: 'Casio calculator left behind in room 204 after the exam.',
-      location: 'Admin Block', date: hoursAgo(16),
-      verifyQuestion: 'What model is the calculator?', verifyAnswer: 'fx-991ES' }),
-    found({ id: 'F7', owner: 'security@campus.edu', title: 'Purse near bus stop', category: 'Wallet & Money', color: 'Brown',
-      tags: ['wallet', 'purse'], description: 'Brown leather purse with some cash, found on the ground.',
-      location: 'Bus Stop', date: hoursAgo(80), status: 'matched',
-      verifyQuestion: 'Whose name is on the ID inside?', verifyAnswer: 'Ankit' }),
-    found({ id: 'F8', owner: 'divya@campus.edu', title: 'Plastic water bottle', category: 'Bottles', color: 'Blue', brand: 'Tupperware',
-      tags: ['bottle'], description: 'Blue plastic bottle found in the common room.',
-      location: 'Girls Hostel', date: hoursAgo(40) }),
-    found({ id: 'F9', owner: 'security@campus.edu', title: 'Bunch of keys', category: 'Keys', color: 'Silver',
-      tags: ['keys', 'keychain'], description: 'Three keys on a ring with a small football keychain.',
-      location: 'Parking Lot', date: hoursAgo(10),
-      verifyQuestion: 'Describe the keychain.', verifyAnswer: 'football' }),
-  ];
-
-  const claims = [
-    { id: 'C1', lostId: 'L5', foundId: 'F7', answer: 'Ankit', status: 'verified', createdAt: hoursAgo(6),
-      messages: [
-        { from: 'system', text: 'Ownership verified ✓ This chat is private. Phone numbers and emails are hidden automatically.', at: hoursAgo(6) },
-        { from: 'finder', text: 'Hi! Your wallet is safe with us at the security office.', at: hoursAgo(5.8) },
-        { from: 'owner', text: 'Thank you so much!! When can I collect it?', at: hoursAgo(5.5) },
-        { from: 'finder', type: 'meetup', place: 'Security Office (Main Gate)', time: new Date(Date.now() + 20 * 3600000).toISOString(), status: 'proposed', text: '', at: hoursAgo(5.4) },
-      ] },
-    { id: 'C2', lostId: 'L3', foundId: 'F3', answer: 'R. Sharma, CSE 3rd year', status: 'pending', createdAt: hoursAgo(3), messages: [] },
-  ];
-
-  return { users, items, claims, dismissed: [], seen: {}, lastRead: {} };
+// --- Starting state -----------------------------------------------------
+// The app starts empty: real students sign up and add real reports.
+function emptyState() {
+  return { users: [], items: [], claims: [], dismissed: [], seen: {}, lastRead: {} };
 }

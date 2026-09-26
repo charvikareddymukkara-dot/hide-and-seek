@@ -16,7 +16,7 @@ Built for the **Rubix 2026 Mini Hackathon**, Problem Statement 1: Smart Lost and
 6. **Safe meetup**: propose and accept a staffed campus spot and time
 7. **Handover**: either side marks it done. Status: **Resolved**
 
-Also: **add / edit / delete** your own reports, a "My reports" dashboard, 🔔 notifications (new matches, claims to review, new messages), search and filters, a dark theme, and a phone-friendly layout.
+Also: **add / edit / delete** your own reports, a "My reports" dashboard, notifications (new matches, claims to review, new messages), search and filters, a purple & white theme, and a phone-friendly layout.
 
 ## How matching works
 
@@ -44,8 +44,8 @@ Missing signals are skipped and the weights re-balanced. If neither the keywords
 ```
 index.html        page layout
 css/style.css     dark theme styling
-js/data.js        campus places, safe spots, users, storage, demo data
-js/cloud.js       shared online database (Firebase Firestore) sync
+js/data.js        campus places, safe spots, icons, users, storage
+cloud.js       shared online database (Firebase Firestore) sync
 js/matcher.js     matching algorithm + answer verification
 js/image.js       photo resizing, colour detection, AI model
 js/app.js         pages, login, forms, chat, add/edit/delete
@@ -53,16 +53,16 @@ js/app.js         pages, login, forms, chat, add/edit/delete
 
 ## Run it
 
-Open `index.html` in a browser. Demo accounts: `priya`, `rohan`, `ankit`, `divya`, `security` (password `demo123`).
+Open `index.html` in a browser, or visit the live site. Create an account with your campus email and start reporting.
 
 ## Turn on the shared database (so many people can use it)
 
 1. Go to https://console.firebase.google.com and click **Create a project** (call it `hide-and-seek`; you can turn Google Analytics off).
 2. In the project, click the **</>** (Web) icon, give the app a nickname, and click **Register app**. Copy the `firebaseConfig = { ... }` block it shows.
 3. Left menu: **Build → Firestore Database → Create database**. Pick a location near you and choose **Start in test mode**.
-4. Open `js/cloud.js`, replace `const FIREBASE_CONFIG = null;` with `const FIREBASE_CONFIG = { ...what you copied... };` and upload it to GitHub again.
+4. Open `cloud.js`, replace `const FIREBASE_CONFIG = null;` with `const FIREBASE_CONFIG = { ...what you copied... };` and upload it to GitHub again.
 
-On first launch the empty database fills with the demo data. The footer shows **☁️ Shared online database** when it's working.
+When it's working, the **How it works** page shows *Data: shared online database*.
 
 ## Future scope
 

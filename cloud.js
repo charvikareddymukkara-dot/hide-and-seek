@@ -86,11 +86,7 @@ const Cloud = (() => {
         snap.docs.forEach((d) => { lastKnown[col + '/' + d.id] = stable(d.data()); });
 
         if (Object.values(received).some((v) => v === null)) return; // still loading
-        if (!ready) {
-          ready = true;
-          // Brand-new empty database → fill it with the demo data once
-          if (!received.users.length && !received.items.length) { write(demoState()); return; }
-        }
+        ready = true;
         onChange(assemble());
       }, (err) => {
         console.error(err);

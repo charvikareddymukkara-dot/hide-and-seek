@@ -13,15 +13,14 @@
 // Where the data comes from:
 //  - Shared online database (if switched on in cloud.js): everyone sees the same data
 //  - Otherwise: this browser's own storage
-const EMPTY_STATE = { users: [], items: [], claims: [], dismissed: [], seen: {}, lastRead: {} };
 let state;
 const usingCloud = Cloud.init((newState, err) => {
   if (err) { toast('Database problem: ' + (err.code || err.message), true); return; }
   state = newState;
   onExternalChange();
 });
-if (usingCloud) state = { ...EMPTY_STATE };
-else { state = Store.load() || demoState(); Store.save(state); }
+if (usingCloud) state = emptyState();
+else { state = Store.load() || emptyState(); Store.save(state); }
 
 const $app = document.getElementById('app');
 
@@ -35,7 +34,7 @@ function esc(s) {
 
 function save() {
   if (!Store.save(state)) {
-    toast('Browser storage is full. Try a smaller photo, or reset the demo data.', true);
+    toast('Browser storage is full. Try a smaller photo.', true);
     return false;
   }
   return true;
@@ -239,12 +238,6 @@ function countUp() {
 
 function pageLogin(params) {
   const mode = params.get('mode') === 'signup' ? 'signup' : 'login';
-  const demo = [
-    ['priya', 'Priya', 'lost a laptop charger'],
-    ['rohan', 'Rohan', 'found that charger'],
-    ['ankit', 'Ankit', 'has an open chat'],
-    ['divya', 'Divya', 'has a claim to review'],
-  ];
   return `
     <section class="login-wrap">
       <div class="login-hero">
@@ -262,16 +255,14 @@ function pageLogin(params) {
           <div class="field"><label>Full name</label><input name="name" maxlength="40" autocomplete="name"></div>
           <div class="field"><label>Username</label><input name="username" maxlength="20" placeholder="e.g. lekhya_r" autocomplete="username" autocapitalize="none"></div>
           <div class="field"><label>Campus email</label><input name="email" type="email" placeholder="you@college.edu" autocomplete="email"></div>`
-          : `<div class="field"><label>Username or campus email</label><input name="login" placeholder="e.g. priya" autocomplete="username" autocapitalize="none"></div>`}
+          : `<div class="field"><label>Username or campus email</label><input name="login" placeholder="your username" autocomplete="username" autocapitalize="none"></div>`}
           <div class="field"><label>Password</label><input name="password" type="password" autocomplete="${mode === 'signup' ? 'new-password' : 'current-password'}"></div>
           <div id="authError" class="error hidden"></div>
           <button class="btn wide" type="submit">${mode === 'signup' ? 'Create account' : 'Log in'}</button>
         </form>
-        <p class="muted small center">Only campus emails (.edu / .ac.in) can join.</p>
-        <div class="demo-box">
-          <p class="small"><b>Demo accounts</b> <span class="muted">(password: ${DEMO_PASSWORD})</span></p>
-          ${demo.map(([e, n, d]) => `<button class="demo-btn" data-demo="${e}"><b>${n}</b> <span class="muted">@${e} · ${d}</span></button>`).join('')}
-        </div>
+        <p class="muted small center">${mode === 'signup'
+          ? 'Only campus emails (.edu / .ac.in) can join. Already have an account? <a href="#/login">Log in</a>'
+          : 'New here? <a href="#/login?mode=signup">Create an account</a> with your campus email.'}</p>
       </div>
     </section>`;
 }
@@ -317,7 +308,8 @@ function pageHome() {
 
     <section>
       <div class="row between"><h2>Recent reports</h2><a href="#/browse">See all →</a></div>
-      <div class="grid">${recent.map(itemCard).join('')}</div>
+      ${recent.length ? `<div class="grid">${recent.map(itemCard).join('')}</div>`
+        : '<p class="empty">No reports yet. Lost or found something? Be the first to report it.</p>'}
     </section>`;
 }
 
@@ -696,7 +688,6 @@ function pageHow() {
          <b>What the item is matters most:</b> if neither the keywords nor the photo agree, the score is halved, so two unrelated
          things lost in the same place at the same time don’t get matched. Found days before it was lost → max 30%.</p>
       <p class="muted small">AI image model: <b id="aiStatus2">${ImageAI.status}</b> · Data: <b>${usingCloud ? 'shared online database' : 'saved on this device'}</b></p>
-      <p class="small"><a href="#" id="resetDemo">Reset demo data</a></p>
     </section>`;
 }
 
@@ -827,11 +818,6 @@ function bindLogin() {
     route();
   });
 
-  document.querySelectorAll('[data-demo]').forEach((b) => b.addEventListener('click', () => {
-    form.login.value = b.dataset.demo;
-    form.password.value = DEMO_PASSWORD;
-    form.requestSubmit();
-  }));
 }
 
 function bindBrowse() {
@@ -1103,18 +1089,6 @@ document.getElementById('userArea').addEventListener('click', (e) => {
 document.addEventListener('click', (e) => {
   const p = document.getElementById('bellPanel');
   if (p && !e.target.closest('.bell-wrap')) p.classList.remove('open');
-});
-
-document.addEventListener('click', (e) => {
-  if (!e.target.closest('#resetDemo')) return;
-  e.preventDefault();
-  if (!confirm(usingCloud
-    ? 'This deletes EVERYONE’s reports and accounts in the shared database and loads the demo data. Continue?'
-    : 'Delete everything and load the demo data again?')) return;
-  state = demoState(); save();
-  Session.clear();
-  location.hash = '#/login'; route();
-  toast('Demo data restored.');
 });
 
 function showAiStatus(s) {
